@@ -1,92 +1,56 @@
-"use client";
+'use client';
 
-import { Sparkles, ArrowRight, Play, ChevronDown } from "lucide-react";
-import Reveal from "@/components/ui/Reveal";
-import { lenisScrollTo } from "@/providers/LenisProvider";
+import { useRef } from 'react';
+import { useLenis } from 'lenis/react';
+import { ArrowRight } from 'lucide-react';
+import { hero } from '@/data';
 
 export default function Hero() {
+  const bgRef = useRef<HTMLDivElement>(null);
+
+  useLenis(({ scroll }: { scroll: number }) => {
+    const el = bgRef.current;
+    if (!el) return;
+    if (scroll < window.innerHeight) {
+      el.style.transform = `translateY(${scroll * 0.32}px)`;
+    }
+  });
+
   return (
-    <section
-      id="hero"
-      className="relative min-h-screen flex items-center justify-center text-center overflow-hidden"
-      style={{ background: "var(--midnight)" }}
-    >
-      {/* Background */}
+    <header className="hero" id="home">
       <div
-        className="absolute inset-0"
-        style={{
-          background: `
-            radial-gradient(ellipse at 30% 20%, rgba(201,168,76,0.08) 0%, transparent 50%),
-            radial-gradient(ellipse at 70% 80%, rgba(142,35,68,0.06) 0%, transparent 50%),
-            linear-gradient(180deg, var(--midnight) 0%, var(--charcoal) 100%)
-          `,
-        }}
+        ref={bgRef}
+        className="hero-bg"
+        style={{ backgroundImage: `var(--hero-overlay), url("${hero.image}")` }}
       />
+      <div className="hero-vignette" />
 
-      {/* Grid pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(var(--gold) 1px, transparent 1px), linear-gradient(90deg, var(--gold) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      {/* Content */}
-      <div className="relative z-10 max-w-[900px] px-6">
-        <Reveal delay={0.1}>
-          <div className="inline-flex items-center gap-2 px-5 py-2 border border-gold/30 text-[11px] tracking-[3px] uppercase text-gold mb-8">
-            <Sparkles size={14} /> Premier Event Designers
-          </div>
-        </Reveal>
-
-        <Reveal delay={0.25}>
-          <h1
-            className="font-display font-light leading-[1.1] text-ivory mb-2"
-            style={{ fontSize: "clamp(3rem, 8vw, 6.5rem)" }}
-          >
-            Crafting <em className="italic text-gold font-normal">Timeless</em>
-            <br />
-            Celebrations
-          </h1>
-        </Reveal>
-
-        <Reveal delay={0.4}>
-          <p
-            className="font-light text-warm-gray max-w-[560px] mx-auto mt-6 mb-10 leading-relaxed"
-            style={{ fontSize: "clamp(14px, 2vw, 18px)" }}
-          >
-            Luxury wedding planning and bespoke event management, bringing your
-            grandest visions to life with artistry, precision, and soul.
-          </p>
-        </Reveal>
-
-        <Reveal delay={0.55}>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <button
-              className="btn-gold"
-              onClick={() => lenisScrollTo("#contact")}
-            >
-              Plan Your Event <ArrowRight size={16} />
-            </button>
-            <button
-              className="btn-outline"
-              onClick={() => lenisScrollTo("#portfolio")}
-            >
-              View Our Work <Play size={14} />
-            </button>
-          </div>
-        </Reveal>
+      <div className="hero-inner">
+        <div className="crest reveal in">
+          <span className="ln" /> {hero.eyebrow} <span className="ln" />
+        </div>
+        <h1 className="reveal in" style={{ transitionDelay: '0.1s' }}>
+          {hero.titleLead}
+          <br />
+          <em>{hero.titleEmphasis}</em> {hero.titleTail}
+        </h1>
+        <p className="sub reveal in" style={{ transitionDelay: '0.2s' }}>
+          {hero.subtitle}
+        </p>
+        <div className="hero-actions reveal in" style={{ transitionDelay: '0.3s' }}>
+          <a href="#contact" className="btn btn-gold">
+            Begin Your Story <ArrowRight size={15} strokeWidth={1.6} />
+          </a>
+          <a href="#portfolio" className="btn btn-outline">
+            View Celebrations
+          </a>
+        </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div
-        onClick={() => lenisScrollTo("#about")}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gold-dim text-[10px] tracking-[3px] uppercase cursor-pointer animate-float"
-      >
-        Scroll <ChevronDown size={18} />
+      <div className="scroll-cue">
+        <span>Scroll</span>
+        <span className="bar" />
       </div>
-    </section>
+    </header>
   );
 }

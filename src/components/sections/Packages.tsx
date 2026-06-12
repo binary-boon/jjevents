@@ -1,78 +1,51 @@
-"use client";
+import { Check, X } from 'lucide-react';
+import Reveal from '@/components/ui/Reveal';
+import Button from '@/components/ui/Button';
+import { packages as defaultPackages, type Package } from '@/data';
 
-import { Check, ArrowRight } from "lucide-react";
-import Reveal from "@/components/ui/Reveal";
-import { PACKAGES } from "@/data/constants";
-import { lenisScrollTo } from "@/providers/LenisProvider";
-
-export default function Packages() {
+export default function Packages({ items = defaultPackages }: { items?: Package[] }) {
   return (
-    <section id="packages" className="max-w-[1280px] mx-auto px-6 py-24 md:py-28">
-      <Reveal>
-        <div className="text-center mb-14">
-          <div className="section-label">Investment</div>
-          <h2 className="section-title">Our Packages</h2>
-          <div className="gold-line mb-4" />
-          <p className="section-subtitle mx-auto">
-            Every package is fully customizable to match your vision. These are
-            starting points — your event is anything but standard.
-          </p>
+    <section className="section section-dark" id="packages">
+      <div className="container">
+        <div className="center-head">
+          <Reveal>
+            <span className="eyebrow center">Ways to Begin</span>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <h2 className="h-title">
+              Collections to suit <em>every</em> vision
+            </h2>
+          </Reveal>
+          <Reveal delay={0.2}>
+            <p className="lead lead-center">
+              Indicative starting points — every celebration is finally quoted to your guest count,
+              venue and dreams. Speak with us for a tailored proposal.
+            </p>
+          </Reveal>
         </div>
-      </Reveal>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start max-w-[480px] lg:max-w-none mx-auto">
-        {PACKAGES.map((pkg, i) => (
-          <Reveal delay={i * 0.15} key={i}>
-            <div
-              className={`relative p-10 transition-all duration-400 border ${
-                pkg.popular
-                  ? "border-gold scale-[1.03] hover:scale-[1.03] hover:-translate-y-1"
-                  : "hover:-translate-y-1"
-              }`}
-              style={{
-                background: "var(--charcoal)",
-                borderColor: pkg.popular ? "var(--gold)" : "rgba(201,168,76,0.08)",
-              }}
-            >
-              {pkg.popular && (
-                <div className="absolute -top-px right-6 bg-gold text-midnight text-[10px] font-bold tracking-[2px] uppercase px-4 py-1.5">
-                  Most Popular
-                </div>
-              )}
-
-              <div className="font-display text-[28px] font-normal text-ivory mb-1">
-                {pkg.name}
-              </div>
-              <div className="text-[12px] text-text-muted tracking-[2px] uppercase mb-6">
-                {pkg.tagline}
-              </div>
-              <div className="font-display text-4xl font-light text-gold mb-2">
-                {pkg.price}
-              </div>
-              <div className="text-[12px] text-text-muted mb-8">
-                Starting price • Customizable
-              </div>
-
-              <div className="h-px bg-gold/10 mb-6" />
-
-              <ul className="list-none mb-8 space-y-2">
-                {pkg.features.map((f, j) => (
-                  <li key={j} className="flex items-center gap-2.5 text-sm text-text-light font-light py-1">
-                    <Check size={16} className={pkg.popular ? "text-gold" : "text-gold-dim"} />
-                    {f}
+        <div className="pkg-grid">
+          {items.map((pkg, i) => (
+            <Reveal key={pkg.name} delay={i * 0.1} className={`pkg${pkg.featured ? ' featured' : ''}`}>
+              {pkg.ribbon && <div className="ribbon">{pkg.ribbon}</div>}
+              <div className="p-name">{pkg.name}</div>
+              <div className="p-for">{pkg.audience}</div>
+              <div className={`p-price${pkg.price === 'On Request' ? ' p-price-sm' : ''}`}>{pkg.price}</div>
+              <div className="p-note">{pkg.priceNote}</div>
+              <ul>
+                {pkg.features.map((f) => (
+                  <li key={f.label} className={f.included ? '' : 'off'}>
+                    {f.included ? <Check size={17} strokeWidth={1.8} /> : <X size={17} strokeWidth={1.8} />}
+                    {f.label}
                   </li>
                 ))}
               </ul>
-
-              <button
-                className={`w-full justify-center ${pkg.popular ? "btn-gold" : "btn-outline"}`}
-                onClick={() => lenisScrollTo("#contact")}
-              >
-                Choose {pkg.name} <ArrowRight size={14} />
-              </button>
-            </div>
-          </Reveal>
-        ))}
+              <Button href="#contact" variant={pkg.featured ? 'gold' : 'outline'} fullWidth>
+                Enquire
+              </Button>
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -1,180 +1,196 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { MapPin, Phone, Mail, Clock, Send, Instagram, Facebook, Youtube, Twitter } from "lucide-react";
-import Reveal from "@/components/ui/Reveal";
-import { CONTACT_INFO } from "@/data/constants";
+import { useState } from 'react';
+import { Send, Check, MapPin, Phone, Mail, Instagram, Facebook } from 'lucide-react';
+import Reveal from '@/components/ui/Reveal';
+import { site, eventTypes, guestRanges } from '@/data';
 
-const CONTACT_ICONS = [MapPin, Phone, Mail, Clock];
-const SOCIAL_ICONS = [Instagram, Facebook, Youtube, Twitter];
+type Status = 'idle' | 'sending' | 'sent' | 'error';
+
+const socialIcon: Record<string, typeof Instagram> = {
+  instagram: Instagram,
+  facebook: Facebook,
+  pinterest: Instagram, // lucide has no Pinterest; reuse or swap for a brand-icon set
+  whatsapp: Phone,
+};
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: "", email: "", phone: "", eventType: "", date: "", guests: "", message: "",
+  const [form, setForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    eventType: eventTypes[0],
+    guests: guestRanges[0],
+    message: '',
   });
-  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState<Status>('idle');
+  const [errorField, setErrorField] = useState<'name' | 'email' | null>(null);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = async () => {
-    setSubmitting(true);
-    // TODO: POST to /api/inquiries (Payload REST API)
-    // await fetch('/api/inquiries', { method: 'POST', body: JSON.stringify(formData) })
-    setTimeout(() => {
-      alert("Thank you! We'll get back to you within 48 hours.");
-      setFormData({ name: "", email: "", phone: "", eventType: "", date: "", guests: "", message: "" });
-      setSubmitting(false);
-    }, 1000);
-  };
-
-  const inputClass =
-    "w-full px-4 py-3.5 text-[15px] font-light text-ivory outline-none transition-colors duration-300 focus:border-gold bg-dark-surface border border-gold/[0.12]";
+  async function submit() {
+    if (!form.name.trim()) return setErrorField('name');
+    if (!form.email.trim()) return setErrorField('email');
+    setErrorField(null);
+    setStatus('sending');
+    try {
+      const res = await fetch('/api/enquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error('Request failed');
+      setStatus('sent');
+    } catch {
+      setStatus('error');
+    }
+  }
 
   return (
-    <section
-      id="contact"
-      className="w-full py-24 md:py-28 px-6"
-      style={{ background: "var(--charcoal)" }}
-    >
-      <div className="max-w-[1280px] mx-auto">
-        <Reveal>
-          <div className="text-center mb-14">
-            <div className="section-label">Get In Touch</div>
-            <h2 className="section-title">Let&apos;s Plan Your Event</h2>
-            <div className="gold-line" />
-          </div>
-        </Reveal>
-
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-10 lg:gap-16">
-          {/* Info */}
-          <Reveal direction="left">
-            <div>
-              <p className="text-base text-warm-gray font-light leading-relaxed mb-10">
-                Ready to create something extraordinary? Share your vision and
-                we&apos;ll craft a personalized proposal within 48 hours. Every great
-                celebration starts with a conversation.
-              </p>
-
-              {CONTACT_INFO.map((info, i) => {
-                const Icon = CONTACT_ICONS[i];
-                return (
-                  <div key={i} className="flex gap-4 mb-8">
-                    <div
-                      className="w-12 h-12 min-w-[48px] flex items-center justify-center text-gold"
-                      style={{ border: "1px solid rgba(201,168,76,0.2)" }}
-                    >
-                      <Icon size={20} />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-ivory mb-1">{info.title}</h4>
-                      <p className="text-sm text-warm-gray font-light">{info.text}</p>
-                    </div>
-                  </div>
-                );
-              })}
-
-              <div className="flex gap-3 mt-4">
-                {SOCIAL_ICONS.map((Icon, i) => (
-                  <a
-                    key={i}
-                    href="#"
-                    className="w-11 h-11 flex items-center justify-center text-text-muted hover:text-gold hover:border-gold transition-all duration-300"
-                    style={{ border: "1px solid rgba(201,168,76,0.2)" }}
-                  >
-                    <Icon size={18} />
-                  </a>
-                ))}
-              </div>
-            </div>
+    <section className="section contact" id="contact">
+      <div className="container contact-grid">
+        <div className="contact-info">
+          <Reveal>
+            <span className="eyebrow">Begin the Conversation</span>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <h2 className="h-title">
+              Let&rsquo;s craft something <em>worth remembering</em>
+            </h2>
+          </Reveal>
+          <Reveal delay={0.2}>
+            <p className="lead">
+              Tell us a little about your celebration. We&rsquo;ll come back within a day with
+              thoughts, availability and a way forward — no obligation, just a conversation.
+            </p>
           </Reveal>
 
-          {/* Form */}
-          <Reveal direction="right">
-            <div className="p-8 lg:p-10 bg-dark-surface border border-gold/[0.08]">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="contact-rows">
+            <Reveal delay={0.2}>
+              <div className="c-row">
+                <div className="ci"><MapPin size={18} /></div>
                 <div>
-                  <label className="block text-[11px] tracking-[2px] uppercase text-text-muted font-medium mb-1.5">
-                    Full Name
-                  </label>
-                  <input name="name" value={formData.name} onChange={handleChange}
-                    placeholder="Your name" className={inputClass} style={{ fontFamily: "var(--font-body, 'Outfit', sans-serif)", background: "var(--dark-surface)" }} />
-                </div>
-                <div>
-                  <label className="block text-[11px] tracking-[2px] uppercase text-text-muted font-medium mb-1.5">
-                    Email
-                  </label>
-                  <input name="email" type="email" value={formData.email} onChange={handleChange}
-                    placeholder="your@email.com" className={inputClass} style={{ fontFamily: "var(--font-body, 'Outfit', sans-serif)", background: "var(--dark-surface)" }} />
-                </div>
-                <div>
-                  <label className="block text-[11px] tracking-[2px] uppercase text-text-muted font-medium mb-1.5">
-                    Phone
-                  </label>
-                  <input name="phone" type="tel" value={formData.phone} onChange={handleChange}
-                    placeholder="+91 XXXXX XXXXX" className={inputClass} style={{ fontFamily: "var(--font-body, 'Outfit', sans-serif)", background: "var(--dark-surface)" }} />
-                </div>
-                <div>
-                  <label className="block text-[11px] tracking-[2px] uppercase text-text-muted font-medium mb-1.5">
-                    Event Type
-                  </label>
-                  <select name="eventType" value={formData.eventType} onChange={handleChange}
-                    className={inputClass} style={{ fontFamily: "var(--font-body, 'Outfit', sans-serif)", background: "var(--dark-surface)" }}>
-                    <option value="">Select event type</option>
-                    <option value="wedding">Wedding</option>
-                    <option value="destination-wedding">Destination Wedding</option>
-                    <option value="corporate">Corporate Event</option>
-                    <option value="celebration">Birthday / Anniversary</option>
-                    <option value="pre-wedding">Engagement / Pre-Wedding</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[11px] tracking-[2px] uppercase text-text-muted font-medium mb-1.5">
-                    Tentative Date
-                  </label>
-                  <input name="date" type="date" value={formData.date} onChange={handleChange}
-                    className={inputClass} style={{ fontFamily: "var(--font-body, 'Outfit', sans-serif)", background: "var(--dark-surface)" }} />
-                </div>
-                <div>
-                  <label className="block text-[11px] tracking-[2px] uppercase text-text-muted font-medium mb-1.5">
-                    Expected Guests
-                  </label>
-                  <select name="guests" value={formData.guests} onChange={handleChange}
-                    className={inputClass} style={{ fontFamily: "var(--font-body, 'Outfit', sans-serif)", background: "var(--dark-surface)" }}>
-                    <option value="">Select range</option>
-                    <option value="under-100">Under 100</option>
-                    <option value="100-300">100 – 300</option>
-                    <option value="300-500">300 – 500</option>
-                    <option value="500-1000">500 – 1000</option>
-                    <option value="1000+">1000+</option>
-                  </select>
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-[11px] tracking-[2px] uppercase text-text-muted font-medium mb-1.5">
-                    Tell Us About Your Vision
-                  </label>
-                  <textarea name="message" value={formData.message} onChange={handleChange}
-                    placeholder="Describe your dream event..." rows={5}
-                    className={`${inputClass} resize-y min-h-[120px]`}
-                    style={{ fontFamily: "var(--font-body, 'Outfit', sans-serif)", background: "var(--dark-surface)" }} />
-                </div>
-                <div className="sm:col-span-2">
-                  <button
-                    className="btn-gold w-full justify-center"
-                    onClick={handleSubmit}
-                    disabled={submitting}
-                  >
-                    <Send size={16} /> {submitting ? "Sending..." : "Send Inquiry"}
-                  </button>
+                  <div className="ck">Studio</div>
+                  <div className="cv">{site.address}</div>
                 </div>
               </div>
+            </Reveal>
+            <Reveal delay={0.3}>
+              <div className="c-row">
+                <div className="ci"><Phone size={18} /></div>
+                <div>
+                  <div className="ck">Speak With Us</div>
+                  <div className="cv">{site.phone}</div>
+                </div>
+              </div>
+            </Reveal>
+            <Reveal delay={0.4}>
+              <div className="c-row">
+                <div className="ci"><Mail size={18} /></div>
+                <div>
+                  <div className="ck">Write To Us</div>
+                  <div className="cv">{site.email}</div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+
+          <Reveal delay={0.4}>
+            <div className="c-socials">
+              {site.socials.map((s) => {
+                const Icon = socialIcon[s.icon] ?? Instagram;
+                return (
+                  <a key={s.label} href={s.href} aria-label={s.label}>
+                    <Icon size={17} />
+                  </a>
+                );
+              })}
             </div>
           </Reveal>
         </div>
+
+        <Reveal delay={0.1} className="form">
+          {status === 'sent' ? (
+            <div className="form-success show">
+              <div className="tick"><Check size={26} strokeWidth={1.6} /></div>
+              <h4>Thank you — it&rsquo;s on its way</h4>
+              <p>
+                We&rsquo;ve received your enquiry and will be in touch shortly. We can&rsquo;t wait to
+                hear about your celebration.
+              </p>
+            </div>
+          ) : (
+            <div>
+              <h3>Enquire about your date</h3>
+              <p className="fsub">A few details to get us started.</p>
+              <div className="form-row">
+                <div className="field">
+                  <label>Your Name</label>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={set('name')}
+                    placeholder="Jaya Singh"
+                    style={errorField === 'name' ? { borderColor: 'var(--rose)' } : undefined}
+                  />
+                </div>
+                <div className="field">
+                  <label>Phone</label>
+                  <input type="tel" value={form.phone} onChange={set('phone')} placeholder="+91 ..." />
+                </div>
+              </div>
+              <div className="field">
+                <label>Email</label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={set('email')}
+                  placeholder="you@example.com"
+                  style={errorField === 'email' ? { borderColor: 'var(--rose)' } : undefined}
+                />
+              </div>
+              <div className="form-row">
+                <div className="field">
+                  <label>Type of Event</label>
+                  <select value={form.eventType} onChange={set('eventType')}>
+                    {eventTypes.map((o) => (
+                      <option key={o}>{o}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>Approx. Guests</label>
+                  <select value={form.guests} onChange={set('guests')}>
+                    {guestRanges.map((o) => (
+                      <option key={o}>{o}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="field">
+                <label>Tell us about your vision</label>
+                <textarea
+                  value={form.message}
+                  onChange={set('message')}
+                  placeholder="Dates you're considering, venue ideas, anything on your mind..."
+                />
+              </div>
+              <button className="btn btn-gold btn-full" onClick={submit} disabled={status === 'sending'}>
+                {status === 'sending' ? 'Sending…' : 'Send Enquiry'}
+                <Send size={16} strokeWidth={1.5} />
+              </button>
+              {status === 'error' && (
+                <p className="form-note" style={{ color: 'var(--rose)' }}>
+                  Something went wrong sending that. Please try again, or email us directly.
+                </p>
+              )}
+              {status !== 'error' && (
+                <p className="form-note">We reply personally, usually within one working day.</p>
+              )}
+            </div>
+          )}
+        </Reveal>
       </div>
     </section>
   );

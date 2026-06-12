@@ -190,7 +190,7 @@ export const MARQUEE_ITEMS = [
 
 // ─── Contact info ───
 export const CONTACT_INFO = [
-  { title: "Visit Us", text: "Jodhpur, Rajasthan, India" },
+  { title: "Visit Us", text: "Udaipur, Rajasthan, India" },
   { title: "Call Us", text: "+91 98XXX XXXXX" },
   { title: "Email Us", text: "hello@jjevents.in" },
   { title: "Working Hours", text: "Mon – Sat, 10 AM – 7 PM" },

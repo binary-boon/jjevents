@@ -1,52 +1,58 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import Reveal from "@/components/ui/Reveal";
-import { FAQS } from "@/data/constants";
+import { useState } from 'react';
+import Reveal from '@/components/ui/Reveal';
+import Button from '@/components/ui/Button';
+import { faqs as defaultFaqs, type Faq } from '@/data';
 
-export default function FAQ() {
-  const [active, setActive] = useState<number | null>(null);
+export default function FAQ({ items = defaultFaqs }: { items?: Faq[] }) {
+  const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="max-w-[1280px] mx-auto px-6 py-24 md:py-28">
-      <Reveal>
-        <div className="text-center mb-12">
-          <div className="section-label">Questions</div>
-          <h2 className="section-title">Frequently Asked</h2>
-          <div className="gold-line" />
-        </div>
-      </Reveal>
-
-      <div className="max-w-[800px] mx-auto">
-        {FAQS.map((faq, i) => (
-          <Reveal delay={i * 0.08} key={i}>
-            <div className="border-b border-gold/10">
-              <button
-                onClick={() => setActive(active === i ? null : i)}
-                className="w-full flex items-center justify-between py-6 font-display text-xl font-normal text-ivory text-left bg-transparent border-none cursor-pointer hover:text-gold transition-colors"
-              >
-                {faq.question}
-                <ChevronDown
-                  size={20}
-                  className="text-gold min-w-[20px] transition-transform duration-300"
-                  style={{ transform: active === i ? "rotate(180deg)" : "none" }}
-                />
-              </button>
-              <div
-                className="overflow-hidden transition-all duration-500 ease-out-expo"
-                style={{
-                  maxHeight: active === i ? "200px" : "0px",
-                  paddingBottom: active === i ? "24px" : "0px",
-                }}
-              >
-                <p className="text-[15px] text-warm-gray font-light leading-relaxed">
-                  {faq.answer}
-                </p>
-              </div>
+    <section className="section section-charcoal" id="faq">
+      <div className="container faq-grid">
+        <div>
+          <Reveal>
+            <span className="eyebrow">Good to Know</span>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <h2 className="h-title">
+              Questions families <em>often</em> ask
+            </h2>
+          </Reveal>
+          <Reveal delay={0.2}>
+            <p className="lead" style={{ marginTop: 22 }}>
+              Can&rsquo;t find what you&rsquo;re looking for? Write to us — we reply to every enquiry
+              personally, usually within a day.
+            </p>
+          </Reveal>
+          <Reveal delay={0.2}>
+            <div style={{ marginTop: 28 }}>
+              <Button href="#contact" variant="gold" arrow>
+                Ask Us Directly
+              </Button>
             </div>
           </Reveal>
-        ))}
+        </div>
+
+        <Reveal delay={0.1} className="faq-list">
+          {items.map((f, i) => {
+            const isOpen = open === i;
+            return (
+              <div key={f.q} className={`faq-item${isOpen ? ' open' : ''}`}>
+                <button className="faq-q" onClick={() => setOpen(isOpen ? null : i)} aria-expanded={isOpen}>
+                  {f.q}
+                  <span className="pm" />
+                </button>
+                <div className="faq-a">
+                  <div>
+                    <p>{f.a}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </Reveal>
       </div>
     </section>
   );

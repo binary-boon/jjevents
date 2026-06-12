@@ -1,54 +1,47 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
-interface AnimatedCounterProps {
-  end: number;
-  suffix?: string;
-  duration?: number;
-}
+type Props = { to: number; suffix?: string; duration?: number };
 
-export default function AnimatedCounter({
-  end,
-  suffix = "",
-  duration = 2000,
-}: AnimatedCounterProps) {
-  const [count, setCount] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
+export default function AnimatedCounter({ to, suffix = '', duration = 1600 }: Props) {
   const ref = useRef<HTMLSpanElement>(null);
+  const [value, setValue] = useState(0);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated) {
-          setHasAnimated(true);
-          let start = 0;
-          const step = end / (duration / 16);
-          const timer = setInterval(() => {
-            start += step;
-            if (start >= end) {
-              setCount(end);
-              clearInterval(timer);
-            } else {
-              setCount(Math.floor(start));
-            }
-          }, 16);
-        }
-      },
-      { threshold: 0.5 }
-    );
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) {
+      setValue(to);
+      return;
+    }
 
-    observer.observe(el);
-    return () => observer.unobserve(el);
-  }, [end, duration, hasAnimated]);
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+        let start: number | null = null;
+        const step = (ts: number) => {
+          if (start === null) start = ts;
+          const p = Math.min((ts - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - p, 3);
+          setValue(Math.round(eased * to));
+          if (p < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      },
+      { threshold: 0.6 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [to, duration]);
 
   return (
     <span ref={ref}>
-      {count}
-      {suffix}
+      {value}
+      {suffix && <span className="suf">{suffix}</span>}
     </span>
   );
 }

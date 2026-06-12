@@ -1,48 +1,60 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, ReactNode } from "react";
-import Lenis from "lenis";
+import { ReactLenis, useLenis } from 'lenis/react';
+import { useEffect, type ReactNode } from 'react';
 
-interface LenisProviderProps {
-  children: ReactNode;
+/**
+ * Wraps the app in a single Lenis instance (root = window scroll).
+ * Any descendant can subscribe with `useLenis(cb)` or grab the instance
+ * with `const lenis = useLenis()`.
+ *
+ * This REPLACES the previous LenisProvider. layout.tsx already imports
+ * `@/providers/LenisProvider`, so no change is needed there.
+ */
+export default function LenisProvider({ children }: { children: ReactNode }) {
+  const prefersReduced =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  return (
+    <ReactLenis
+      root
+      options={{
+        duration: 1.15,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: !prefersReduced,
+      }}
+    >
+      <SmoothAnchors />
+      {children}
+    </ReactLenis>
+  );
 }
 
-export default function LenisProvider({ children }: LenisProviderProps) {
-  const lenisRef = useRef<Lenis | null>(null);
+/**
+ * Delegated click handler: any <a href="#section"> scrolls smoothly via Lenis,
+ * accounting for the fixed navbar. Lives inside ReactLenis so useLenis() works.
+ */
+function SmoothAnchors() {
+  const lenis = useLenis();
 
   useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      touchMultiplier: 2,
-      infinite: false,
-    });
-
-    lenisRef.current = lenis;
-
-    // Expose lenis scrollTo globally for navigation
-    (window as any).__lenis = lenis;
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
+    function onClick(e: MouseEvent) {
+      const anchor = (e.target as HTMLElement)?.closest?.(
+        'a[href^="#"]'
+      ) as HTMLAnchorElement | null;
+      if (!anchor) return;
+      const id = anchor.getAttribute('href');
+      if (!id || id.length < 2) return;
+      const el = document.querySelector(id);
+      if (!el) return;
+      e.preventDefault();
+      if (lenis) lenis.scrollTo(el as HTMLElement, { offset: -70, duration: 1.3 });
+      else el.scrollIntoView({ behavior: 'smooth' });
     }
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, [lenis]);
 
-    requestAnimationFrame(raf);
-
-    return () => {
-      lenis.destroy();
-      lenisRef.current = null;
-    };
-  }, []);
-
-  return <>{children}</>;
-}
-
-// Helper to scroll to an element
-export function lenisScrollTo(target: string | HTMLElement, offset = -80) {
-  const lenis = (window as any).__lenis;
-  if (lenis) {
-    lenis.scrollTo(target, { offset, duration: 1.2 });
-  }
+  return null;
 }

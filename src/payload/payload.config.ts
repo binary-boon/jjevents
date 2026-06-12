@@ -4,6 +4,7 @@ import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import path from "path";
 import sharp from "sharp";
+import { collections } from './collections';
 
 // Collections
 import { Media } from "./collections/Media";
@@ -42,7 +43,7 @@ export default buildConfig({
     Venues,
     Inquiries,
     FAQ,
-    Packages,
+    ...collections,
   ],
 
   // ─── Vercel Postgres ───

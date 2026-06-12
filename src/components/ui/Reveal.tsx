@@ -1,61 +1,47 @@
-"use client";
+'use client';
 
-import { useEffect, useRef, useState, ReactNode } from "react";
-import { clsx } from "clsx";
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
-interface RevealProps {
+type Props = {
   children: ReactNode;
+  /** stagger delay in seconds */
   delay?: number;
-  direction?: "up" | "down" | "left" | "right" | "none";
+  /** use the clip-path "curtain" reveal instead of fade-up */
+  arch?: boolean;
   className?: string;
-  threshold?: number;
-}
+};
 
-export default function Reveal({
-  children,
-  delay = 0,
-  direction = "up",
-  className = "",
-  threshold = 0.15,
-}: RevealProps) {
+/**
+ * Adds the `in` class once the element scrolls into view, driving the
+ * `.reveal` / `.reveal-arch` transitions defined in globals.css.
+ * Reduced motion is handled in CSS.
+ */
+export default function Reveal({ children, delay = 0, arch = false, className }: Props) {
   const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [shown, setShown] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
-    const observer = new IntersectionObserver(
+    const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(el);
+          setShown(true);
+          io.disconnect();
         }
       },
-      { threshold }
+      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
     );
-
-    observer.observe(el);
-    return () => observer.unobserve(el);
-  }, [threshold]);
-
-  const transforms: Record<string, string> = {
-    up: "translateY(60px)",
-    down: "translateY(-60px)",
-    left: "translateX(60px)",
-    right: "translateX(-60px)",
-    none: "none",
-  };
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <div
       ref={ref}
-      className={className}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? "none" : transforms[direction],
-        transition: `opacity 0.9s cubic-bezier(0.16,1,0.3,1) ${delay}s, transform 0.9s cubic-bezier(0.16,1,0.3,1) ${delay}s`,
-      }}
+      className={cn(arch ? 'reveal-arch' : 'reveal', shown && 'in', className)}
+      style={delay ? { transitionDelay: `${delay}s` } : undefined}
     >
       {children}
     </div>
