@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@layer base {
+  :root {
+    --midnight: #0A0A0F;
+    --charcoal: #141418;
+    --dark-surface: #1A1A22;
+    --gold: #C9A84C;
+    --gold-light: #E8D48B;
+    --gold-dim: #8B7632;
+    --ivory: #FAF7F0;
+    --cream: #F5F0E8;
+    --warm-gray: #9A968E;
+    --text-light: #E8E4DD;
+    --text-muted: #7A766F;
+    --blush: #D4637A;
+    --sage: #8FA88A;
+  }
+
+  html {
+    scroll-behavior: auto; /* Lenis handles smooth scroll */
+  }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--midnight);
+    color: var(--text-light);
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--gold);
+    color: var(--midnight);
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--midnight); }
+  ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+}
+
+@layer components {
+  /* ─── Buttons ─── */
+  .btn-gold {
+    @apply inline-flex items-center gap-2.5 px-9 py-4 text-xs font-semibold uppercase tracking-[2px] border-none cursor-pointer;
+    background: var(--gold);
+    color: var(--midnight);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-gold:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(201, 168, 76, 0.3);
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center gap-2.5 px-8 py-3.5 text-xs font-semibold uppercase tracking-[2px] cursor-pointer bg-transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-outline:hover {
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.08);
+    transform: translateY(-2px);
+  }
+
+  /* ─── Section helpers ─── */
+  .section-label {
+    @apply text-[11px] font-semibold uppercase tracking-[4px] mb-4;
+    font-family: 'Outfit', sans-serif;
+    color: var(--gold);
+  }
+
+  .section-title {
+    @apply leading-tight mb-5;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 300;
+    color: var(--ivory);
+  }
+
+  .section-subtitle {
+    @apply max-w-xl font-light leading-relaxed;
+    font-size: 16px;
+    color: var(--warm-gray);
+  }
+
+  .gold-line {
+    @apply mx-auto;
+    width: 60px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .gold-line-left {
+    width: 60px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  /* ─── Grain overlay ─── */
+  .grain-overlay {
+    @apply fixed inset-0 pointer-events-none z-[9999];
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+}
